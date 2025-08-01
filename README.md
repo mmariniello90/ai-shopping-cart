@@ -139,4 +139,3 @@ AI: No problem, I have removed "Warm Winter Puffer Jacket" from your cart.
 
 -----
 
-e MIT License. See the `LICENSE` file for more information.
