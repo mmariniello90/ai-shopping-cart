@@ -24,6 +24,18 @@ def get_similar_items(query_text: str, n_results: int = 2):
 
     return retrieved_items["metadatas"][0]
 
+def manage_shopping_cart(shopping_cart: list, action: str, item: str) -> list:
+
+    if action == "add":
+        shopping_cart.append(item)
+    elif action == "remove":
+        shopping_cart.remove(item)
+    else:
+        print(f"Action {action} not allowed")
+
+    return shopping_cart
+
+
 tools = [
     {
         "type": "function",
@@ -47,8 +59,38 @@ tools = [
             ],
             "additionalProperties": False
         }
-    }
-
+    },
+    {
+        "type": "function",
+        "name": "manage_shopping_cart",
+        "description": "Add or remove items from the shopping cart.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "shopping_cart": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "The list representing the shopping cart"
+                },
+                "action": {
+                    "type": "string",
+                    "description": "The action to apply in the cart. It can be add or remove."
+                },
+                "item": {
+                    "type": "string",
+                    "description": "The item to add or remove from the cart.",
+                }
+            },
+            "required": [
+                "shopping_cart",
+                "action",
+                "item"
+            ],
+            "additionalProperties": False
+        }
+    },
 ]
 
 

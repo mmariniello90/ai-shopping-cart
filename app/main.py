@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import json
 
 from prompts import system_prompt
-from tools import tools, get_similar_items
+from tools import tools, get_similar_items, manage_shopping_cart
 from vector_db import create_chroma_persistent_client, create_collection
 
 
@@ -30,6 +30,8 @@ def run():
     console = Console()
     client = OpenAI()
 
+    shopping_cart = []
+
     conversation_history = [
         {
             "role": "system",
@@ -41,7 +43,7 @@ def run():
     while True:
 
         #user_input = console.input("\nTu: ")
-        user_input = console.input("[deep_sky_blue1]You:[/deep_sky_blue1]")
+        user_input = console.input("[deep_sky_blue1]You: [/deep_sky_blue1]")
 
         if user_input.lower() == 'quit':
             #console.print(Markdown(f"[bold red]AI: Bye Bye![/bold red]"))
@@ -75,19 +77,23 @@ def run():
 
             print("tool called")
             tool_call = response.output[0]
+            print("TOOL CALL: ", tool_call.name)
             args = json.loads(tool_call.arguments)
-            print(args)
 
-            search_result = get_similar_items(args["query_text"])
+            tool_result = None
+            if tool_call.name == "get_similar_items":
+                tool_result = get_similar_items(args["query_text"])
+            elif tool_call.name == "manage_shopping_cart":
+                tool_result = manage_shopping_cart(shopping_cart, args["action"], args["item"])
 
-            print(f"RESULT: ")
-            print(search_result)
+            print(f"RESULT TOOL {tool_call.name}: ")
+            print(tool_result)
 
             conversation_history.append(tool_call)  # append model's function call message
             conversation_history.append({
                 "type": "function_call_output",
                 "call_id": tool_call.call_id,
-                "output": str(search_result)
+                "output": str(tool_result)
             })
 
             response_2 = client.responses.create(
