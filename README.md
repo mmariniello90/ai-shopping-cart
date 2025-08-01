@@ -1,4 +1,4 @@
-![Alt text](./logo.PNG)
+![Alt text](logo.png)
 -----
 
 # Gennaro - Your AI Shopping Assistant 🛒
