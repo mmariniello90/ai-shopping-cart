@@ -1,8 +1,8 @@
-Of course\! Here is a README for your GitHub project based on the provided logic and system prompt.
-
 -----
 
 # Gennaro - Your AI Shopping Assistant 🛒
+
+![Alt text](logo.png)
 
 Meet **Gennaro**, a friendly and intelligent conversational AI designed to enhance your e-commerce experience. Gennaro acts as your personal shopping assistant, helping you find products, discover similar items, and manage your shopping cart with ease, all through a natural chat interface.
 
