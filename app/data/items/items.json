@@ -1,0 +1,42 @@
+[
+  {
+    "item_code": "aaa001",
+    "item_price": 12.99
+  },
+  {
+    "item_code": "aaa002",
+    "item_price": 14.49
+  },
+  {
+    "item_code": "aaa003",
+    "item_price": 13.75
+  },
+  {
+    "item_code": "aaa004",
+    "item_price": 15.20
+  },
+  {
+    "item_code": "aaa005",
+    "item_price": 16.99
+  },
+  {
+    "item_code": "aaa006",
+    "item_price": 17.50
+  },
+  {
+    "item_code": "aaa007",
+    "item_price": 18.50
+  },
+  {
+    "item_code": "aaa008",
+    "item_price": 19.00
+  },
+  {
+    "item_code": "aaa009",
+    "item_price": 19.99
+  },
+  {
+    "item_code": "aaa010",
+    "item_price": 40.00
+  }
+]

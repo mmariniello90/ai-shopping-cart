@@ -1,10 +1,14 @@
+import json
+import logging
+
 from openai import OpenAI
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
-from PIL import Image
+from rich import print as rprint
+from rich.logging import RichHandler
+
 from dotenv import load_dotenv
-import json
 
 from prompts import system_prompt
 from tools import tools, get_similar_items, manage_shopping_cart
@@ -68,50 +72,75 @@ def run():
         assistant_message = response.output_text
         #assistant_message = response.choices[0].message
 
-        print("----" * 50)
+        #print("----" * 50)
         #print(response.to_json())
-        print(response.output[0].to_dict())
-        print("----" * 50)
+        #print(response.output[0].to_dict())
+        #print("----" * 50)
 
         if "call_id" in response.output[0].to_dict():
 
             print("tool called")
             tool_call = response.output[0]
-            print("TOOL CALL: ", tool_call.name)
+            print(f"TOOL CALL: {tool_call.name}")
             args = json.loads(tool_call.arguments)
 
             tool_result = None
             if tool_call.name == "get_similar_items":
                 tool_result = get_similar_items(args["query_text"])
+
+                conversation_history.append(tool_call)  # append model's function call message
+                conversation_history.append({
+                    "type": "function_call_output",
+                    "call_id": tool_call.call_id,
+                    "output": str(tool_result)
+                })
+
+                #search_response = f"I've found something: {[(item) for item in tool_result]}"
+
+                search_response = client.responses.create(
+                    model="gpt-4o-mini",
+                    input=str(tool_result),
+                    instructions="You will receive a JSON as input. Show and describe each item in it.",
+                    temperature=1.0,
+                    tools=tools
+                )
+
+                console.print(Panel(Markdown(search_response.output_text), title="[deep_sky_blue1]AI[/deep_sky_blue1]",
+                                    title_align="left", border_style="#12a0d7"))
+
+                conversation_history.append({"role": "assistant", "content": search_response.output_text})
+
+
             elif tool_call.name == "manage_shopping_cart":
                 tool_result = manage_shopping_cart(shopping_cart, args["action"], args["item"])
 
-            print(f"RESULT TOOL {tool_call.name}: ")
-            print(tool_result)
+                conversation_history.append(tool_call)  # append model's function call message
+                conversation_history.append({
+                    "type": "function_call_output",
+                    "call_id": tool_call.call_id,
+                    "output": str(tool_result)
+                })
 
-            conversation_history.append(tool_call)  # append model's function call message
-            conversation_history.append({
-                "type": "function_call_output",
-                "call_id": tool_call.call_id,
-                "output": str(tool_result)
-            })
+                response_2 = client.responses.create(
+                    model="gpt-4o-mini",
+                    input=conversation_history,
+                    temperature=1.0,
+                    tools=tools
+                )
 
-            response_2 = client.responses.create(
-                model="gpt-4o-mini",
-                input=conversation_history,
-                temperature=1.0,
-                tools=tools
-            )
 
-            console.print(Panel(Markdown(response_2.output_text), title="[deep_sky_blue1]AI[/deep_sky_blue1]",
+                console.print(Panel(Markdown(response_2.output_text), title="[deep_sky_blue1]AI[/deep_sky_blue1]",
                                 title_align="left", border_style="#12a0d7"))
 
+                conversation_history.append({"role": "assistant", "content": response_2.output_text})
 
-        console.print(Panel(Markdown(assistant_message), title="[deep_sky_blue1]AI[/deep_sky_blue1]",
+
+        else:
+            console.print(Panel(Markdown(assistant_message), title="[deep_sky_blue1]AI[/deep_sky_blue1]",
                             title_align="left", border_style="#12a0d7"))
 
-        # Add assistant's message to the history for context in the next turn
-        conversation_history.append({"role": "assistant", "content": assistant_message})
+            # Add assistant's message to the history for context in the next turn
+            conversation_history.append({"role": "assistant", "content": assistant_message})
 
 
 
