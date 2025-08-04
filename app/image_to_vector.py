@@ -11,9 +11,7 @@ from vector_db import create_chroma_persistent_client, create_collection
 
 
 def resize_image(image_path: str, scale_factor: float) -> Image:
-
     with Image.open(f"{image_path}") as img:
-
         original_width, original_height = img.size
 
         new_width = int(original_width * scale_factor)
@@ -31,7 +29,6 @@ def encode_image(image: Image):
 
 
 def get_image_description(client: OpenAI, b64_image: Image) -> str:
-
     instructions = """
         You are involved in a Fashion Company as describer of images depicting clothes (or gadgets) of any type.
         You goal is to provide a clear description of the clothe in the image.
@@ -69,11 +66,7 @@ def get_image_description(client: OpenAI, b64_image: Image) -> str:
 
 
 def get_image_embedding(client, text):
-
-    response = client.embeddings.create(
-        input=text,
-        model="text-embedding-3-small"
-    )
+    response = client.embeddings.create(input=text, model="text-embedding-3-small")
     return response.data[0].embedding
 
 
@@ -87,34 +80,25 @@ def main():
 
     chroma_client = create_chroma_persistent_client(path="app/chroma_db")
     chroma_collection = create_collection(
-        client=chroma_client,
-        collection_name="app_collection"
+        client=chroma_client, collection_name="app_collection"
     )
 
-    with open(items_path, 'r') as f:
+    with open(items_path, "r") as f:
         items_data = json.load(f)
 
     for item in track(items_data, description="Processing..."):
-
         item_code = item["item_code"]
         item_price = item["item_price"]
 
         img = resize_image(
-            image_path=f"{images_path}/{item_code}.jpeg",
-            scale_factor=0.90
+            image_path=f"{images_path}/{item_code}.jpeg", scale_factor=0.90
         )
 
         b64_encode = encode_image(image=img)
 
-        image_description = get_image_description(
-            client=client,
-            b64_image=b64_encode
-        )
+        image_description = get_image_description(client=client, b64_image=b64_encode)
 
-        image_embedding = get_image_embedding(
-            client=emb_client,
-            text=image_description
-        )
+        image_embedding = get_image_embedding(client=emb_client, text=image_description)
 
         chroma_collection.add(
             ids=[item_code],
@@ -124,9 +108,9 @@ def main():
                     "image_name": f"{item_code}.jpeg",
                     "item_code": item_code,
                     "image_description": image_description,
-                    "image_price": item_price
+                    "image_price": item_price,
                 }
-            ]
+            ],
         )
 
 

@@ -11,4 +11,3 @@ def create_chroma_persistent_client(path: str):
 
 def create_collection(client, collection_name: str):
     return client.get_or_create_collection(name=collection_name)
-
